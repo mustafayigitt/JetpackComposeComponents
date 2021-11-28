@@ -3,23 +3,31 @@ package com.mustafayigit.jetpackcomposecomponents
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import com.mustafayigit.jetpackcomposecomponents.data.getListItems
 import com.mustafayigit.jetpackcomposecomponents.ui.theme.JetpackComposeComponentsTheme
-import kotlinx.coroutines.launch
+import com.mustafayigit.jetpackcomposecomponents.util.printToast
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,79 +38,72 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class Animal(@DrawableRes val imageSrc: Int) {
-    object Dog : Animal(R.drawable.image_dog)
-    object Cat : Animal(R.drawable.image_cat)
-}
-
 @Composable
 fun HomeScreen() {
     JetpackComposeComponentsTheme {
 
-        val scrollState = rememberScrollState()
-        val scope = rememberCoroutineScope()
-        var selectedAnimal by remember { mutableStateOf<Animal?>(null) }
+        val context = LocalContext.current
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState),
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Hello Compose",
-                style = MaterialTheme.typography.h2,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-            )
 
-            Image(
-                painter = painterResource(
-                    id = selectedAnimal?.imageSrc ?: R.drawable.ic_launcher_foreground
-                ),
-                contentDescription = "selected animal image",
-                modifier = Modifier
-                    .fillMaxWidth(fraction = 0.75f)
-                    .aspectRatio(3 / 8f),
-                contentScale = ContentScale.Crop
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                RadioButton(
-                    selected = selectedAnimal is Animal.Dog,
-                    onClick = { selectedAnimal = Animal.Dog },
-                )
-
-                RadioButton(
-                    selected = selectedAnimal is Animal.Cat,
-                    onClick = { selectedAnimal = Animal.Cat },
+            item {
+                Text(
+                    text = "Hello Compose",
+                    style = MaterialTheme.typography.h2,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                 )
             }
 
-            Button(
-                onClick = {
-                    scope.launch {
-                        scrollState.animateScrollTo(0)
+            items(getListItems()) { item ->
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clickable { item.id printToast context },
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = 0.dp,
+                    backgroundColor = Color(0x4D018786)
+                ) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                    ) {
+                        Image(
+                            painter = rememberImagePainter(item.coverImage),
+                            contentDescription = "photo ${item.title}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .align(Alignment.CenterHorizontally),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.body1,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(horizontal = 24.dp, vertical = 16.dp)
+                        )
+
                     }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Black,
-                    contentColor = Color.White,
-                )
-            ) {
-                Text(text = "Scroll to Top")
-            }
+                }
 
-            Spacer(modifier = Modifier.size(100.dp))
+            }
         }
     }
 }
