@@ -2,9 +2,7 @@ package com.mustafayigit.jetpackcomposecomponents.viewmodel
 
 import androidx.lifecycle.ViewModel
 
-class HomeViewModel : ViewModel() {
+class ExploreViewModel: ViewModel() {
 
-    fun getTitle() = "Home"
-
-
+    fun getTitle() = "Explore"
 }
