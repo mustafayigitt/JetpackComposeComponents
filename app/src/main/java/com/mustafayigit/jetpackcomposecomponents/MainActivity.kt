@@ -3,31 +3,23 @@ package com.mustafayigit.jetpackcomposecomponents
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import com.mustafayigit.jetpackcomposecomponents.data.getListItems
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mustafayigit.jetpackcomposecomponents.ui.theme.JetpackComposeComponentsTheme
-import com.mustafayigit.jetpackcomposecomponents.util.printToast
+import com.mustafayigit.jetpackcomposecomponents.viewmodel.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,73 +31,58 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    homeViewModel: HomeViewModel = viewModel()
+) {
+    val count by homeViewModel.count.collectAsState()
+
     JetpackComposeComponentsTheme {
 
-        val context = LocalContext.current
-
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            item {
-                Text(
-                    text = "Hello Compose",
-                    style = MaterialTheme.typography.h2,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                )
-            }
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.h5,
+            )
 
-            items(getListItems()) { item ->
+            Spacer(modifier = Modifier.size(30.dp))
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clickable { item.id printToast context },
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = 0.dp,
-                    backgroundColor = Color(0x4D018786)
-                ) {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                    ) {
-                        Image(
-                            painter = rememberImagePainter(item.coverImage),
-                            contentDescription = "photo ${item.title}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp)
-                                .align(Alignment.CenterHorizontally),
-                            contentScale = ContentScale.Crop
-                        )
+            CountButton("Increment Count") { homeViewModel.incrementCount() }
 
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.body1,
-                            textAlign = TextAlign.Center,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .padding(horizontal = 24.dp, vertical = 16.dp)
-                        )
+            Spacer(modifier = Modifier.size(20.dp))
 
-                    }
-                }
+            CountButton("Reset") { homeViewModel.resetCount() }
 
-            }
         }
     }
+}
+
+@Composable
+fun CountButton(text: String, action: () -> Unit) {
+
+    Button(
+        onClick = action,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Black,
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.h6,
+        )
+    }
+
 }
 
 @Preview(showBackground = true)
